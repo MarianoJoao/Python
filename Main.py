@@ -1,11 +1,10 @@
 import cgitb
 import sqlite3
+import re
 
 # Criar o banco de dados
 conn = sqlite3.connect('pessoas1.db')
 cursor = conn.cursor()
-
-
 
 # Criar a tabela de pessoas
 cursor.execute("""
@@ -59,6 +58,51 @@ def exibir_pessoas():
     cursor.execute("SELECT * FROM pessoas")
     return cursor.fetchall()
 
+# Função que retorna se email válido
+def validar_email(email):
+    parametro = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+    return parametro.match(email)
+
+# Função que retorna se string tem apenas caracteres válidos
+def validar_texto(texto):
+    parametro = r'^[a-zA-Z\u00C0-\u00FF]+$'
+    op = re.search(parametro, texto)
+    return bool(op)
+
+# Função que retorna se string tem apenas caracteres válidos
+def validar_idade(id):
+    if id >= 1 | id <= 120:
+        return True
+    else:
+        return False
+
+def guarda_lista():
+    nome = input('Nome: ')
+    while validar_texto(nome) == False: #Valida texto
+        print("Caractere inválido")
+        nome = input('Nome: ')
+        if validar_texto(nome):
+            break  
+
+    email = input('Email: ')
+    while validar_email(email) != True: #Valida email
+        print("email inválido")
+        email = input('Email: ')
+        if validar_email(email):
+            break        
+
+    telefone = input('Telefone: ')
+
+    idade = int(input('Idade: '))
+    while validar_idade(idade) != True: #Valida idade
+        print("Idade inválida")
+        idade = input('Idade: ')
+        if validar_idade(idade):
+            break  
+        
+    inserir_pessoa(nome, email, telefone, idade)
+    print('Pessoa inserida com sucesso!')
+
 # Loop para a interface do usuário
 while True:
     print('1 - Inserir pessoa')
@@ -71,12 +115,7 @@ while True:
     opcao = int(input('Opção: '))
 
     if opcao == 1:
-        nome = input('Nome: ')
-        email = input('Email: ')
-        telefone = input('Telefone: ')
-        idade = int(input('Idade: '))
-        inserir_pessoa(nome, email, telefone, idade)
-        print('Pessoa inserida com sucesso!')
+        guarda_lista()
 
     elif opcao == 2:
         id = int(input('ID da pessoa a ser buscada: '))
@@ -88,22 +127,45 @@ while True:
                 print('Idade:', pessoa[4])
         else:
                 print('Pessoa não encontrada.')
+
     elif opcao == 3:
         id = int(input('ID da pessoa a ser atualizada: '))
+
         nome = input('Novo nome: ')
+        while validar_texto(nome) == False: #Valida texto
+            print("Caractere inválido")
+            nome = input('Nome: ')
+            if validar_texto(nome):
+                break  
+
         email = input('Novo email: ')
+        while validar_email(email) != True: #Valida email
+            print("email inválido")
+            email = input('Email: ')
+            if validar_email(email):
+                break 
+
         telefone = input('Novo telefone: ')
+
         idade = int(input('Nova idade: '))
+        while validar_idade(idade) != True: #Valida idade
+            print("Idade inválida")
+            idade = input('Idade: ')
+            if validar_idade(idade):
+                break  
+    
         atualizar_pessoa(id, nome, email, telefone, idade)
         print('Pessoa atualizada com sucesso!')
+
     elif opcao == 4:
         id = int(input('ID da pessoa a ser excluída: '))
         excluir_pessoa(id)
         print('Pessoa excluída com sucesso!')
+
     elif opcao == 5:
         
-        tbpessoas = exibir_pessoas()
-        for pessoa in tbpessoas:
+        pessoas = exibir_pessoas()
+        for pessoa in pessoas:
             print('\n------------------------------------')
             print('ID:', pessoa[0])
             print('Nome:', pessoa[1])
@@ -112,9 +174,9 @@ while True:
             print('Idade:', pessoa[4])
             print('------------------------------------')
 
-
     elif opcao == 0:
         break
+
     else:
         print('Opção inválida.')
 
